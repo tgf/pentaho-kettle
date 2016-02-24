@@ -1,0 +1,31 @@
+<div ng-controller="RepositorySelectionController">
+    <h3 class="step-title">Select a repository type</h3><br />
+    <div id="button-row" class="row">
+      <div ng-repeat="repository in repoModel.repositories" class="col-xs-4 type-btn" on-finish-render="ngRepeatFinished">
+        <button button-select id="button-{{repository.id}}" class="repo-btn {{repository.class}}" ng-class="{'selected': repository == repoModel.selectedRepository}" ng-click="selectRepository(repository)">{{repository.text}}</button>
+      </div>
+    </div>
+    <div id="display-box">
+        <div id="triangle-up"></div>
+        <div id="display">
+            <div id="text-box">
+              <div ng-repeat="repository in repoModel.repositories" class="text-cell">
+                <span ng-show="repository==repoModel.selectedRepository" class="animate-hide" ng-bind-html="repository.message"></span>
+              </div>
+            </div>
+            <a ng-click="next()" href="#{{repoModel.selectedRepository.link}}">
+              <button id="get-started" class="btn btn-primary">Get Started</button>
+            </a>
+        </div>
+    </div>
+    <div class="panel-foot">
+      <div clas="row">
+        <div class="col-xs-6 panel-foot-left">
+            <span class="help-link">Help</span>
+        </div>
+        <div class="col-xs-6 panel-foot-right">
+            <button id="close-btn" class="btn btn-default" ng-click="close()">Close</button>
+        </div>
+      </div>
+    </div>
+</div>

@@ -17,6 +17,7 @@
 package org.pentaho.di.repository.pur;
 
 import java.util.List;
+import java.util.Map;
 
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
@@ -72,6 +73,15 @@ public class PurRepositoryMeta extends BaseRepositoryMeta implements RepositoryM
     } catch ( Exception e ) {
       throw new KettleException( "Unable to load Kettle database repository meta object", e );
     }
+  }
+
+  @Override public RepositoryMeta build( Map<String, Object> map ) {
+    name = (String) map.get( "displayName" );
+    description = (String) map.get( "description" );
+    repositoryLocation = new PurRepositoryLocation( (String) map.get( "url" ) );
+    versionCommentMandatory = true;
+
+    return null;
   }
 
   public RepositoryCapabilities getRepositoryCapabilities() {

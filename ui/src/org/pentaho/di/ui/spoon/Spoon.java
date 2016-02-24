@@ -66,7 +66,10 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.custom.CTabFolder;
@@ -3725,6 +3728,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
   }
 
   public void openRepository() {
+
     // Check to tabs are dirty and warn user that they must save tabs prior to connecting.  Don't connect!
     if ( Spoon.getInstance().isTabsChanged() ) {
       MessageBox mb = new MessageBox( Spoon.getInstance().getShell(), SWT.OK );

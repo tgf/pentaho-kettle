@@ -23,6 +23,7 @@
 package org.pentaho.di.repository.filerep;
 
 import java.util.List;
+import java.util.Map;
 
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
@@ -111,6 +112,10 @@ public class KettleFileRepositoryMeta extends BaseRepositoryMeta implements Repo
     } catch ( Exception e ) {
       throw new KettleException( "Unable to load Kettle file repository meta object", e );
     }
+  }
+
+  @Override public RepositoryMeta build( Map<String, Object> map ) {
+    return null;
   }
 
   /**

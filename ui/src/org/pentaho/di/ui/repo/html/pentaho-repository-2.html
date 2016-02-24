@@ -1,0 +1,33 @@
+<div ng-controller="KettleFileRepositoryController">
+  <h3 class="step-title">Congratulations!</h3>
+  <div class="step-body">
+    <p>
+      Your connection was created and is ready to use.
+    </p>
+    <br /><br />
+    <p>
+      What would you like to do?
+    </p>
+    <br />
+    <p>
+      <button class="btn btn-primary end">Connect Now</button>
+    </p>
+    <br />
+    <p>
+      <a href="#repository-selection">
+        <button class="btn btn-default end">Create New Connection</button>
+      </a>
+    </p>
+    <div class="panel-foot">
+        <hr />
+        <div clas="row">
+          <div class="col-xs-6 panel-foot-left">
+              <span class="help-link">Help</span>
+          </div>
+          <div class="col-xs-6 panel-foot-right">
+            <button id="close-btn" class="btn btn-default" ng-click="close()">Close</button>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
