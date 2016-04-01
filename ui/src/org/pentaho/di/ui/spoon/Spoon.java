@@ -66,10 +66,7 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.custom.CTabFolder;
@@ -284,6 +281,7 @@ import org.pentaho.di.ui.job.dialog.JobDialogPluginType;
 import org.pentaho.di.ui.job.dialog.JobLoadProgressDialog;
 import org.pentaho.di.ui.partition.dialog.PartitionSchemaDialog;
 import org.pentaho.di.ui.repository.ILoginCallback;
+import org.pentaho.di.ui.repository.IXulDialogExtension;
 import org.pentaho.di.ui.repository.RepositoriesDialog;
 import org.pentaho.di.ui.repository.RepositorySecurityUI;
 import org.pentaho.di.ui.repository.dialog.RepositoryDialogInterface;
@@ -3727,6 +3725,11 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     newHop( transMeta, null, null );
   }
 
+  private IXulDialogExtension repositoriesExtension;
+  public void setRepositoriesExtension( IXulDialogExtension repositoriesExtension ) {
+    this.repositoriesExtension = repositoriesExtension;
+  }
+
   public void openRepository() {
 
     // Check to tabs are dirty and warn user that they must save tabs prior to connecting.  Don't connect!
@@ -3766,6 +3769,9 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
 
       }
     } );
+    if ( repositoriesExtension != null ) {
+      loginDialog.extendDialog( repositoriesExtension );
+    }
     loginDialog.show();
   }
 

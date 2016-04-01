@@ -3,8 +3,10 @@ package org.pentaho.di.ui.repo;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.widgets.Shell;
-import org.pentaho.di.repository.RepositoryMeta;
+import org.pentaho.di.ui.repository.IRepoConnectionCallback;
 import org.pentaho.di.ui.thin.ThinDialog;
+import org.pentaho.platform.settings.ServerPort;
+import org.pentaho.platform.settings.ServerPortRegistry;
 
 import java.util.HashMap;
 
@@ -13,16 +15,17 @@ import java.util.HashMap;
  */
 public class RepoConnectionDialog extends ThinDialog {
 
-  public static int WIDTH = 630;
-  public static int HEIGHT = 630;
-  public static String TITLE = "New Repository Connection";
-  public static String URL = "http://localhost:8000";
+  private static final int WIDTH = 630;
+  private static final int HEIGHT = 630;
+  private static final String TITLE = "New Repository Connection";
+  private static final String WEB_CLIENT_PATH =  "/repositories/web/index.html";
+  private static final String OSGI_SERVICE_PORT = "OSGI_SERVICE_PORT";
 
   public RepoConnectionDialog( Shell shell ) {
-    super( shell, WIDTH, HEIGHT, TITLE, URL );
+    super( shell, WIDTH, HEIGHT, TITLE, getRepoURL() );
   }
 
-  public void open( final RepoConnectionCallback callback ) {
+  public void open( final IRepoConnectionCallback callback ) {
     super.createDialog();
 
     new BrowserFunction( browser, "createPentahoRepo" ) {
@@ -48,5 +51,19 @@ public class RepoConnectionDialog extends ThinDialog {
         display.sleep();
       }
     }
+  }
+  
+
+  private static Integer getOsgiServicePort() {
+    // if no service port is specified try getting it from
+    ServerPort osgiServicePort = ServerPortRegistry.getPort( OSGI_SERVICE_PORT );
+    if ( osgiServicePort != null ) {
+      return osgiServicePort.getAssignedPort();
+    }
+    return null;
+  }
+
+  private static String getRepoURL() {
+    return "http://localhost:" + getOsgiServicePort() + WEB_CLIENT_PATH;
   }
 }

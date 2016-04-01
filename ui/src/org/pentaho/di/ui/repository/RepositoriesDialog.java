@@ -98,4 +98,8 @@ public class RepositoriesDialog {
     XulDialog dialog = (XulDialog) container.getDocumentRoot().getElementById( "repository-login-dialog" );
     return (Shell) dialog.getRootObject();
   }
+
+  public void extendDialog( IXulDialogExtension extension ) {
+    extension.extendXulDialog( container );
+  }
 }

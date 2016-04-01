@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<overlay id="repositories-overlay" title="Repository overlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+         xmlns:HTML="http://www.w3.org/Profiles/XHTML-transitional" height="600" width="800" onload="modeler.init()"
+         xmlns:pen="http://www.pentaho.org/2008/xul">
+  <menupopup id="repository-popup">
+
+      <menuitem id="repository-connect-plugin" label="${menu_repositories_connect_label}"
+                insertbefore="repository-disconnect"
+                command="repositoriesMenuEventHandler.openRepositoriesDialog()" />
+
+  </menupopup>
+
+</overlay>

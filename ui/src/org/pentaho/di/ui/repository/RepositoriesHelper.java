@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.corba.se.spi.activation.RepositoryHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.exception.KettleException;
@@ -41,13 +40,9 @@ import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.RepositoriesMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryMeta;
-import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
-import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.core.dialog.ErrorDialog;
-import org.pentaho.di.ui.repo.RepoConnectionCallback;
-import org.pentaho.di.ui.repo.RepoConnectionDialog;
 import org.pentaho.di.ui.repository.dialog.RepositoryDialogInterface;
 import org.pentaho.di.ui.repository.dialog.RepositoryDialogInterface.MODE;
 import org.pentaho.di.ui.repository.model.RepositoriesModel;
@@ -100,13 +95,65 @@ public class RepositoriesHelper {
   }
 
   public void newRepository() {
+    PluginRegistry registry = PluginRegistry.getInstance();
+    Class<? extends PluginTypeInterface> pluginType = RepositoryPluginType.class;
+    List<PluginInterface> plugins = registry.getPlugins( pluginType );
+
+    String[] names = new String[plugins.size()];
+    for ( int i = 0; i < names.length; i++ ) {
+      PluginInterface plugin = plugins.get( i );
+      names[i] = plugin.getName() + " - " + plugin.getDescription();
+    }
+
+    // TODO: make this a bit fancier!
+    EnterSelectionDialog selectRepositoryType = new EnterSelectionDialog( this.shell, names,
+      BaseMessages.getString( PKG, "RepositoryLogin.SelectRepositoryType" ),
+      BaseMessages.getString( PKG, "RepositoryLogin.SelectRepositoryTypeCreate" ) );
+    String choice = selectRepositoryType.openRepoDialog();
+    if ( choice != null ) {
+      int index = selectRepositoryType.getSelectionNr();
+      PluginInterface plugin = plugins.get( index );
+      String id = plugin.getIds()[0];
+
+      try {
+        // With this ID we can create a new Repository object...
+        //
+        RepositoryMeta repositoryMeta =
+          PluginRegistry.getInstance().loadClass( RepositoryPluginType.class, id, RepositoryMeta.class );
+        RepositoryDialogInterface dialog = getRepositoryDialog( plugin, repositoryMeta, input, this.shell );
+        RepositoryMeta meta = dialog.open( MODE.ADD );
+        if ( meta != null ) {
+          // If the repository meta is not null and the repository name does not exist in the repositories list.
+          // If it does then display a error to the user
+          if ( meta.getName() != null ) {
+            input.addRepository( meta );
+            fillRepositories();
+            model.setSelectedRepository( meta );
+            writeData();
+          }
+        }
+      } catch ( Exception e ) {
+        log.logDetailed( BaseMessages.getString( PKG, "RepositoryLogin.ErrorCreatingRepository", e
+          .getLocalizedMessage() ) );
+        new ErrorDialog( shell, BaseMessages.getString( PKG, "Dialog.Error" ), BaseMessages.getString(
+          PKG, "RepositoryLogin.ErrorCreatingRepository", e.getLocalizedMessage() ), e );
+      }
+    }
+  }
+
+//  public void newNewRepository() {
+//    //TODO out
+//    RepoConnectionDialog repoConnectionDialog = new RepoConnectionDialog( shell );
+//    repoConnectionDialog.open( getRepoConnectionCallback() );
+//  }
+
+  public IRepoConnectionCallback getRepoConnectionCallback() {
 
     PluginRegistry registry = PluginRegistry.getInstance();
     Class<? extends PluginTypeInterface> pluginType = RepositoryPluginType.class;
     final List<PluginInterface> plugins = registry.getPlugins( pluginType );
 
-    RepoConnectionDialog repoConnectionDialog = new RepoConnectionDialog( shell );
-    repoConnectionDialog.open( new RepoConnectionCallback() {
+    return new IRepoConnectionCallback() {
       @Override public void invoke( Map<String, Object> map ) {
         Integer index = (Integer) map.get( "index" );
         PluginInterface plugin = plugins.get( index );
@@ -129,7 +176,7 @@ public class RepositoriesHelper {
               BaseMessages.getString( PKG, "RepositoryLogin.ErrorCreatingRepository", e.getLocalizedMessage() ), e );
         }
       }
-    } );
+    };
   }
 
   public void editRepository() {

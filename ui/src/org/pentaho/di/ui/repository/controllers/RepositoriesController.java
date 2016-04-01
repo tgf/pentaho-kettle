@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.RepositoryMeta;
 import org.pentaho.di.ui.repository.ILoginCallback;
+import org.pentaho.di.ui.repository.IRepoConnectionCallback;
 import org.pentaho.di.ui.repository.RepositoriesHelper;
 import org.pentaho.di.ui.repository.dialog.RepositoryDialogInterface;
 import org.pentaho.di.ui.repository.model.RepositoriesModel;
@@ -308,6 +309,10 @@ public class RepositoriesController extends AbstractXulEventHandler {
    */
   public void updateShowDialogAtStartup() {
     helper.updateShowDialogOnStartup( showAtStartup.isChecked() );
+  }
+
+  public IRepoConnectionCallback getRepoConnectionCallback() {
+    return helper.getRepoConnectionCallback();
   }
 
   public XulMessageBox getMessageBox() {
