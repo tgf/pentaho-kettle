@@ -46,7 +46,7 @@ public class RepoConnectionDialog extends ThinDialog {
       }
     };
 
-    while ( !display.isDisposed() ) {
+    while ( !dialog.isDisposed() ) {
       if ( !display.readAndDispatch() ) {
         display.sleep();
       }
