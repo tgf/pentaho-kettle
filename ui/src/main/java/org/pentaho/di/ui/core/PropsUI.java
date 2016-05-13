@@ -875,8 +875,9 @@ public class PropsUI extends Props {
   public int[] getSashWeights() {
     int w1 = Const.toInt( properties.getProperty( STRING_SASH_W1 ), 25 );
     int w2 = Const.toInt( properties.getProperty( STRING_SASH_W2 ), 75 );
-
-    return new int[] { w1, w2 };
+    // TODO: TEMP testing
+    int w3 = Const.toInt( properties.getProperty( STRING_SASH_W1 ), 25 );
+    return new int[] { w1, w2, w3 };
   }
 
   public void setOpenLastFile( boolean open ) {

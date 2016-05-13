@@ -42,6 +42,9 @@ public class SpoonTreeDelegateExtension {
     this.objects = objects;
   }
 
+  /**
+   * a TransMeta or a JobMeta
+   */
   public AbstractMeta getTransMeta() {
     return transMeta;
   }
@@ -50,10 +53,16 @@ public class SpoonTreeDelegateExtension {
     return path;
   }
 
+  /**
+   * getPath().length
+   */
   public int getCaseNumber() {
     return caseNumber;
   }
 
+  /**
+   * an empty list
+   */
   public List<TreeSelection> getObjects() {
     return objects;
   }

@@ -224,6 +224,7 @@
     <menuitem id="slave-cluster-class-new" label="${Spoon.Menu.Popup.BASE.New}" command="spoon.newSlaveServer()" />
   </menupopup>
 
+  <!-- TODO: move out beyond this point -->
   <menupopup id="trans-inst">
     <menuitem id="trans-inst-settings" label="${Spoon.Menu.Transformation.Settings}" command="spoon.editTransformationPropertiesPopup()" />
     <menuitem id="trans-inst-logging" label="${Spoon.Menu.Popup.BASE.LogWindow}" command="spoon.addTransLog()" />
@@ -262,7 +263,7 @@
     <menuitem id="step-inst-share" label="${Spoon.Menu.Popup.STEPS.Share}" command="spoon.shareObject('step-inst-share')" />
     <menuseparator id="step-inst-separator-1"/>
     <menuitem id="step-inst-help" label="${Spoon.Menu.Popup.STEPS.Help}" command="spoon.helpStep()" />
-    
+
   </menupopup>
 
   <menupopup id="job-entry-copy-inst">
@@ -271,7 +272,7 @@
     <menuitem id="job-entry-copy-delete" label="${Spoon.Menu.Popup.STEPS.Delete}" command="spoon.deleteJobEntryCopies()" />
     <menuseparator id="job-entry-copy-inst-separator-1"/>
     <menuitem id="job-entry-copy-help" label="${Spoon.Menu.Popup.STEPS.Help}" command="spoon.helpJobEntry()" />
-    
+
   </menupopup>
 
   <menupopup id="trans-hop-inst">

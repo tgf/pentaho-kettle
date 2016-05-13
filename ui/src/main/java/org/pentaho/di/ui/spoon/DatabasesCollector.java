@@ -26,6 +26,7 @@ import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.repository.Repository;
+import org.pentaho.di.trans.HasDatabasesInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,13 +38,13 @@ import java.util.Map;
  * @author Andrey Khayrutdinov
  */
 public class DatabasesCollector {
-  private final AbstractMeta meta;
+  private final HasDatabasesInterface meta;
   private final Repository repository;
 
   private List<String> dbNames;
   private Map<String, DatabaseMeta> names2metas;
 
-  public DatabasesCollector( AbstractMeta meta, Repository repository ) {
+  public DatabasesCollector( HasDatabasesInterface meta, Repository repository ) {
     this.meta = meta;
     this.repository = repository;
   }

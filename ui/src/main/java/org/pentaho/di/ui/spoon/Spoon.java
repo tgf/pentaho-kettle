@@ -142,6 +142,7 @@ import org.pentaho.di.core.ObjectUsageCount;
 import org.pentaho.di.core.Props;
 import org.pentaho.di.core.RowMetaAndData;
 import org.pentaho.di.core.SourceToTargetMapping;
+import org.pentaho.di.core.SwtUniversalImage;
 import org.pentaho.di.core.XmlExportHelper;
 import org.pentaho.di.core.changed.ChangedFlagInterface;
 import org.pentaho.di.core.changed.PDIObserver;
@@ -307,6 +308,10 @@ import org.pentaho.di.ui.spoon.dialog.LogSettingsDialog;
 import org.pentaho.di.ui.spoon.dialog.MetaStoreExplorerDialog;
 import org.pentaho.di.ui.spoon.dialog.SaveProgressDialog;
 import org.pentaho.di.ui.spoon.job.JobGraph;
+import org.pentaho.di.ui.spoon.panel.SpoonJobEntryTreePanel;
+import org.pentaho.di.ui.spoon.panel.SpoonStepTreePanel;
+import org.pentaho.di.ui.spoon.panel.SpoonTreePanel;
+import org.pentaho.di.ui.spoon.panel.view.SpoonViewTreePanel;
 import org.pentaho.di.ui.spoon.partition.PartitionMethodSelector;
 import org.pentaho.di.ui.spoon.partition.PartitionSettings;
 import org.pentaho.di.ui.spoon.partition.processor.MethodProcessor;
@@ -404,7 +409,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
 
   public static final String APP_NAME = BaseMessages.getString( PKG, "Spoon.Application.Name" );
 
-  private static final String STRING_SPOON_MAIN_TREE = BaseMessages.getString( PKG, "Spoon.MainTree.Label" );
+  public static final String STRING_SPOON_MAIN_TREE = BaseMessages.getString( PKG, "Spoon.MainTree.Label" );
 
   private static final String STRING_SPOON_CORE_OBJECTS_TREE = BaseMessages
       .getString( PKG, "Spoon.CoreObjectsTree.Label" );
@@ -571,6 +576,9 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
 
   public static final String XUL_FILE_MAIN = "ui/spoon.xul";
 
+  /**
+   * the id->component map for view tree popup
+   */
   private Map<String, XulComponent> menuMap = new HashMap<>();
 
   private RepositoriesDialog loginDialog;
@@ -762,7 +770,6 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
 
     props = PropsUI.getInstance();
     sharedObjectsFileMap = new Hashtable<>();
-    // sharedObjectSyncUtil = new SharedObjectSyncUtil( delegates, sharedObjectsFileMap );
     Thread uiThread = Thread.currentThread();
 
     display = Display.findDisplay( uiThread );
@@ -918,6 +925,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     createPopupMenus();
     addTree();
     addTabs();
+    addTreeTestStuff();//TODO TESTING
     mainPerspective.setTabset( this.tabfolder );
     ( (Composite) deck.getManagedObject() ).layout( true, true );
 
@@ -2067,6 +2075,76 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     } );
   }
 
+  //TODO TESTING
+  private Composite testComposite;
+  private SpoonTreePanel testPanelTrans;
+  private SpoonTreePanel testPanelJob;
+  private SpoonViewTreePanel testViewPanel;
+  private Composite testPanelNone;
+  private CTabItem designItem;
+
+  private void addTreeTestStuff() {
+    testComposite = new Composite( sashform, SWT.BORDER );
+    testComposite.setLayout( new FormLayout() );
+    props.setLook( testComposite, Props.WIDGET_STYLE_TOOLBAR );
+    CTabFolder tabFolder = new CTabFolder( testComposite, SWT.HORIZONTAL );
+    props.setLook( tabFolder, Props.WIDGET_STYLE_TAB );
+
+    FormData fdTab = new FormData();
+    fdTab.left = new FormAttachment( 0 );
+    fdTab.top = new FormAttachment( 0 );
+    fdTab.right = new FormAttachment( 100 );
+    fdTab.bottom = new FormAttachment( 100 );
+    tabFolder.setLayoutData( fdTab );
+    tabFolder.setLayout( new FormLayout() );
+
+    testPanelTrans = new SpoonStepTreePanel( tabFolder );
+//    testPanelTrans.setTreeDelegate( delegates.tree );
+
+    designItem = new CTabItem( tabFolder, SWT.NONE );
+    designItem.setText( STRING_SPOON_CORE_OBJECTS_TREE );
+    designItem.setImage( GUIResource.getInstance().getImageEditSmall() );
+    designItem.setControl( testPanelTrans.getUI() );
+
+    testPanelJob = new SpoonJobEntryTreePanel( tabFolder );
+
+    testPanelNone = new Composite( tabFolder, SWT.NONE );
+    FormData fdTestPanelNone = new FormData();
+    fdTestPanelNone.top = new FormAttachment( 0 );
+    fdTestPanelNone.left = new FormAttachment( 0 );
+    fdTestPanelNone.right = new FormAttachment( 100 );
+    fdTestPanelNone.bottom = new FormAttachment( 100 );
+    testPanelNone.setLayoutData( fdTestPanelNone );
+    testPanelNone.setEnabled( false );
+    testPanelNone.setLayout( new FillLayout() );
+    Label noneLbl = new Label( testPanelNone, SWT.CENTER );
+    noneLbl.setText( "..." );
+    tabFolder.setSelection( 0 );
+
+    testViewPanel = new SpoonViewTreePanel( tabFolder, delegates.tabs );
+    //setUpSelectionTree( testViewPanel.getTree() );
+    CTabItem viewItem = new CTabItem( tabFolder, SWT.NONE );
+    //viewItem.setControl( new Composite( tabFolder, SWT.NONE ) );
+    viewItem.setControl( testViewPanel.getUI() );
+    viewItem.setText( STRING_SPOON_MAIN_TREE );
+    viewItem.setImage( GUIResource.getInstance().getImageExploreSolutionSmall() );
+
+    onTheEnablementOfTestTreeStuff( getActiveTransformation() != null, getActiveJob() != null  );
+  }
+
+  private void onTheEnablementOfTestTreeStuff( boolean transSelected, boolean jobSelected ) {
+    if ( testPanelTrans != null ) {
+       // testPanel.setEnabled( transSelected || jobSelected );
+       if ( transSelected ) {
+         designItem.setControl( testPanelTrans.getUI() );
+       } else if ( jobSelected ) {
+         designItem.setControl( testPanelJob.getUI() );
+       } else {
+         designItem.setControl( testPanelNone );
+       }
+    }
+  }
+
   public boolean setViewMode() {
     if ( viewSelected ) {
       return true;
@@ -2193,43 +2271,16 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
         TreeItem item = searchMouseOverTreeItem( coreObjectsTree.getItems(), move.x, move.y );
         if ( item != null ) {
           String name = item.getText();
-          String tip = coreStepToolTipMap.get( name );
-          if ( tip != null ) {
-            PluginInterface plugin = PluginRegistry.getInstance().findPluginWithName( StepPluginType.class, name );
-            if ( plugin != null ) {
-              Image image =
-                  GUIResource.getInstance().getImagesSteps().get( plugin.getIds()[0] ).getAsBitmapForSize( display,
-                      ConstUI.ICON_SIZE, ConstUI.ICON_SIZE );
-              if ( image == null ) {
-                toolTip.hide();
-              }
-              toolTip.setImage( image );
-              toolTip.setText( name + Const.CR + Const.CR + tip );
-              toolTip.setBackgroundColor( GUIResource.getInstance().getColor( 255, 254, 225 ) );
-              toolTip.setForegroundColor( GUIResource.getInstance().getColor( 0, 0, 0 ) );
-              toolTip.show( new org.eclipse.swt.graphics.Point( move.x + 10, move.y + 10 ) );
-            }
-          }
-          tip = coreJobToolTipMap.get( name );
-          if ( tip != null ) {
-            PluginInterface plugin =
-              PluginRegistry.getInstance().findPluginWithName( JobEntryPluginType.class, name );
-            if ( plugin != null ) {
-              Image image =
-                  GUIResource.getInstance().getImagesJobentries().get( plugin.getIds()[0] ).getAsBitmapForSize(
-                      display, ConstUI.ICON_SIZE, ConstUI.ICON_SIZE );
-              toolTip.setImage( image );
-              toolTip.setText( name + Const.CR + Const.CR + tip );
-              toolTip.setBackgroundColor( GUIResource.getInstance().getColor( 255, 254, 225 ) );
-              toolTip.setForegroundColor( GUIResource.getInstance().getColor( 0, 0, 0 ) );
-              toolTip.show( new org.eclipse.swt.graphics.Point( move.x + 10, move.y + 10 ) );
-            }
-          }
+          // TODO: we prolly know if on a job or trans...
+          showItemTooltip( toolTip, name, move, coreStepToolTipMap,
+              GUIResource.getInstance().getImagesSteps(), StepPluginType.class );
+          showItemTooltip( toolTip, name, move, coreJobToolTipMap,
+              GUIResource.getInstance().getImagesJobentries(), JobEntryPluginType.class );
         }
       }
     } );
 
-    addDragSourceToTree( coreObjectsTree );
+    addDragSourceToCoreObjectsTree( coreObjectsTree );
     addDefaultKeyListeners( coreObjectsTree );
     coreObjectsTree.addMouseListener( new MouseAdapter() {
       @Override
@@ -2245,6 +2296,29 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     toolTip.setPopupDelay( 350 );
     toolTip.setHideDelay( 5000 );
     toolTip.setShift( new org.eclipse.swt.graphics.Point( ConstUI.TOOLTIP_OFFSET, ConstUI.TOOLTIP_OFFSET ) );
+  }
+
+  private boolean showItemTooltip( DefaultToolTip toolTip, String name, MouseEvent move, Map<String, String> tooltipMap,
+      Map<String, SwtUniversalImage> imageMap, Class<? extends PluginTypeInterface> clazz ) {
+    String tip = tooltipMap.get( name );
+    if ( tip != null ) {
+      PluginInterface plugin = PluginRegistry.getInstance().findPluginWithName( clazz, name );
+      if ( plugin != null ) {
+        Image image =
+            imageMap.get( plugin.getIds()[0] ).getAsBitmapForSize( display,
+                ConstUI.ICON_SIZE, ConstUI.ICON_SIZE );
+        //  if ( image == null ) {
+        //    toolTip.hide();
+        //  }
+        toolTip.setImage( image );
+        toolTip.setText( name + Const.CR + Const.CR + tip );
+        toolTip.setBackgroundColor( GUIResource.getInstance().getColor( 255, 254, 225 ) );
+        toolTip.setForegroundColor( GUIResource.getInstance().getColor( 0, 0, 0 ) );
+        toolTip.show( new org.eclipse.swt.graphics.Point( move.x + 10, move.y + 10 ) );
+        return true;
+      }
+    }
+    return false;
   }
 
   protected TreeItem searchMouseOverTreeItem( TreeItem[] treeItems, int x, int y ) {
@@ -2298,106 +2372,35 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
 
     if ( showTrans ) {
       selectionLabel.setText( BaseMessages.getString( PKG, "Spoon.Steps" ) );
-      // Fill the base components...
-      //
-      // ////////////////////////////////////////////////////////////////////////////////////////////////
-      // TRANSFORMATIONS
-      // ////////////////////////////////////////////////////////////////////////////////////////////////
-
-      PluginRegistry registry = PluginRegistry.getInstance();
-
-      final List<PluginInterface> baseSteps = registry.getPlugins( StepPluginType.class );
-      final List<String> baseCategories = registry.getCategories( StepPluginType.class );
-
-      for ( String baseCategory : baseCategories ) {
-        TreeItem item = new TreeItem( coreObjectsTree, SWT.NONE );
-        item.setText( baseCategory );
-        item.setImage( GUIResource.getInstance().getImageFolder() );
-
-        List<PluginInterface> sortedCat = new ArrayList<>();
-        for ( PluginInterface baseStep : baseSteps ) {
-          if ( baseStep.getCategory().equalsIgnoreCase( baseCategory ) ) {
-            sortedCat.add( baseStep );
-          }
-        }
-        Collections.sort( sortedCat, new Comparator<PluginInterface>() {
-          @Override
-          public int compare( PluginInterface p1, PluginInterface p2 ) {
-            return p1.getName().compareTo( p2.getName() );
-          }
-        } );
-        for ( PluginInterface p : sortedCat ) {
-          final Image stepImage =
-            GUIResource.getInstance().getImagesStepsSmall().get( p.getIds()[ 0 ] );
-          String pluginName = p.getName();
-          String pluginDescription = p.getDescription();
-          if ( !filterMatch( pluginName ) && !filterMatch( pluginDescription ) ) {
-            continue;
-          }
-          createTreeItem( item, pluginName, stepImage );
-          coreStepToolTipMap.put( pluginName, pluginDescription );
-        }
-      }
-
-      // Add History Items...
-      TreeItem item = new TreeItem( coreObjectsTree, SWT.NONE );
-      item.setText( BaseMessages.getString( PKG, "Spoon.History" ) );
-      item.setImage( GUIResource.getInstance().getImageFolder() );
-
-      List<ObjectUsageCount> pluginHistory = props.getPluginHistory();
-
-      // The top 10 at most, the rest is not interesting anyway
-      //
-      for ( int i = 0; i < pluginHistory.size() && i < 10; i++ ) {
-        ObjectUsageCount usage = pluginHistory.get( i );
-        PluginInterface stepPlugin =
-          PluginRegistry.getInstance().findPluginWithId( StepPluginType.class, usage.getObjectName() );
-        if ( stepPlugin != null ) {
-          final Image stepImage =
-              GUIResource.getInstance().getImagesSteps().get( stepPlugin.getIds()[0] ).getAsBitmapForSize( display, ConstUI.MEDIUM_ICON_SIZE, ConstUI.MEDIUM_ICON_SIZE );
-          String pluginName = Const.NVL( stepPlugin.getName(), "" );
-          String pluginDescription = Const.NVL( stepPlugin.getDescription(), "" );
-
-          if ( !filterMatch( pluginName ) && !filterMatch( pluginDescription ) ) {
-            continue;
-          }
-
-          TreeItem stepItem = createTreeItem( item, pluginName, stepImage );
-          stepItem.addListener( SWT.Selection, new Listener() {
-
-            @Override
-            public void handleEvent( Event event ) {
-              System.out.println( "Tree item Listener fired" );
-            }
-          } );
-
-          coreStepToolTipMap.put( stepPlugin.getDescription(), pluginDescription + " (" + usage.getNrUses() + ")" );
-        }
-      }
+      refreshStepTree( coreObjectsTree, coreStepToolTipMap, selectionFilter.getText() );
     }
 
     if ( showJob ) {
-      // Fill the base components...
-      //
-      // ////////////////////////////////////////////////////////////////////////////////////////////////
-      // JOBS
-      // ////////////////////////////////////////////////////////////////////////////////////////////////
-
       selectionLabel.setText( BaseMessages.getString( PKG, "Spoon.Entries" ) );
-      PluginRegistry registry = PluginRegistry.getInstance();
-      List<PluginInterface> baseJobEntries = registry.getPlugins( JobEntryPluginType.class );
-      List<String> baseCategories = registry.getCategories( JobEntryPluginType.class );
+      refreshJobEntryTree( coreObjectsTree, coreJobToolTipMap, selectionFilter.getText() );
+    }
 
-      TreeItem generalItem = null;
+    variableComposite.layout( true, true );
 
-      for ( String baseCategory : baseCategories ) {
-        TreeItem item = new TreeItem( coreObjectsTree, SWT.NONE );
-        item.setText( baseCategory );
-        item.setImage( GUIResource.getInstance().getImageFolder() );
+    previousShowTrans = showTrans;
+    previousShowJob = showJob;
+  }
 
-        if ( baseCategory.equalsIgnoreCase( JobEntryPluginType.GENERAL_CATEGORY ) ) {
-          generalItem = item;
-        }
+  private void refreshJobEntryTree( Tree jobEntryTree, Map<String,String> coreJobToolTipMap, String filter ) {
+    PluginRegistry registry = PluginRegistry.getInstance();
+    List<PluginInterface> baseJobEntries = registry.getPlugins( JobEntryPluginType.class );
+    List<String> baseCategories = registry.getCategories( JobEntryPluginType.class );
+
+    TreeItem generalItem = null;
+
+    for ( String baseCategory : baseCategories ) {
+      TreeItem item = new TreeItem( jobEntryTree, SWT.NONE );
+      item.setText( baseCategory );
+      item.setImage( GUIResource.getInstance().getImageFolder() );
+
+      if ( baseCategory.equalsIgnoreCase( JobEntryPluginType.GENERAL_CATEGORY ) ) {
+        generalItem = item;
+      }
         List<PluginInterface> sortedCat = new ArrayList<>();
         for ( PluginInterface baseJob : baseJobEntries ) {
           if ( baseJob.getCategory().equalsIgnoreCase( baseCategory ) ) {
@@ -2413,75 +2416,124 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
         for ( int j = 0; j < sortedCat.size(); j++ ) {
           if ( !sortedCat.get( j ).getIds()[ 0 ].equals( "SPECIAL" ) ) {
             if ( sortedCat.get( j ).getCategory().equalsIgnoreCase( baseCategory ) ) {
-              final Image jobEntryImage =
+            final Image jobEntryImage =
                   GUIResource.getInstance().getImagesJobentriesSmall().get( sortedCat.get( j ).getIds()[0] );
               String pluginName = Const.NVL( sortedCat.get( j ).getName(), "" );
               String pluginDescription = Const.NVL( sortedCat.get( j ).getDescription(), "" );
 
-              if ( !filterMatch( pluginName ) && !filterMatch( pluginDescription ) ) {
-                continue;
-              }
-
-              TreeItem stepItem = createTreeItem( item, pluginName, jobEntryImage );
-              stepItem.addListener( SWT.Selection, new Listener() {
-
-                @Override
-                public void handleEvent( Event arg0 ) {
-                  System.out.println( "Tree item Listener fired" );
-                }
-              } );
-              // if (isPlugin)
-              // stepItem.setFont(GUIResource.getInstance().getFontBold());
-
-              coreJobToolTipMap.put( pluginName, pluginDescription );
+            if ( !filterMatch( pluginName, filter ) && !filterMatch( pluginDescription, filter ) ) {
+              continue;
             }
+ 
+            createTreeItem( item, pluginName, jobEntryImage );
+            coreJobToolTipMap.put( pluginName, pluginDescription );
           }
         }
-      }
-
-      // First add a few "Special entries: Start, Dummy, OK, ERROR
-      // We add these to the top of the base category, we don't care about
-      // the sort order here.
-      //
-      JobEntryCopy startEntry = JobMeta.createStartEntry();
-      JobEntryCopy dummyEntry = JobMeta.createDummyEntry();
-
-      String[] specialText = new String[] { startEntry.getName(), dummyEntry.getName(), };
-      String[] specialTooltip = new String[] { startEntry.getDescription(), dummyEntry.getDescription(), };
-      Image[] specialImage =
-        new Image[] {
-          GUIResource.getInstance().getImageStartMedium(), GUIResource.getInstance().getImageDummyMedium() };
-
-      int pos = 0;
-      for ( int i = 0; i < specialText.length; i++ ) {
-        if ( !filterMatch( specialText[i] ) && !filterMatch( specialTooltip[i] ) ) {
-          continue;
-        }
-
-        TreeItem specialItem = new TreeItem( generalItem, SWT.NONE, pos );
-        specialItem.setImage( specialImage[i] );
-        specialItem.setText( specialText[i] );
-        specialItem.addListener( SWT.Selection, new Listener() {
-
-          @Override
-          public void handleEvent( Event arg0 ) {
-            System.out.println( "Tree item Listener fired" );
-          }
-
-        } );
-
-        coreJobToolTipMap.put( specialText[i], specialTooltip[i] );
-        pos++;
       }
     }
 
-    variableComposite.layout( true, true );
+    // First add a few "Special entries: Start, Dummy, OK, ERROR
+    // We add these to the top of the base category, we don't care about
+    // the sort order here.
+    //
+    JobEntryCopy startEntry = JobMeta.createStartEntry();
+    JobEntryCopy dummyEntry = JobMeta.createDummyEntry();
 
-    previousShowTrans = showTrans;
-    previousShowJob = showJob;
+    String[] specialText = new String[] { startEntry.getName(), dummyEntry.getName(), };
+    String[] specialTooltip = new String[] { startEntry.getDescription(), dummyEntry.getDescription(), };
+    Image[] specialImage =
+      new Image[] {
+        GUIResource.getInstance().getImageStartMedium(), GUIResource.getInstance().getImageDummyMedium() };
+
+    int pos = 0;
+    for ( int i = 0; i < specialText.length; i++ ) {
+      if ( !filterMatch( specialText[i] ) && !filterMatch( specialTooltip[i] ) ) {
+        continue;
+      }
+
+      TreeItem specialItem = new TreeItem( generalItem, SWT.NONE, pos );
+      specialItem.setImage( specialImage[i] );
+      specialItem.setText( specialText[i] );
+
+      coreJobToolTipMap.put( specialText[i], specialTooltip[i] );
+      pos++;
+    }
   }
 
-  protected void shareObject( SharedObjectInterface sharedObject ) {
+  private void refreshStepTree( Tree stepsTree, Map<String, String> coreStepToolTipMap, String filter ) {
+    PluginRegistry registry = PluginRegistry.getInstance();
+
+    final List<PluginInterface> baseSteps = registry.getPlugins( StepPluginType.class );
+    final List<String> baseCategories = registry.getCategories( StepPluginType.class );
+
+    for ( String baseCategory : baseCategories ) {
+      TreeItem item = new TreeItem( stepsTree, SWT.NONE );
+      item.setText( baseCategory );
+      item.setImage( GUIResource.getInstance().getImageFolder() );
+
+      List<PluginInterface> sortedCat = new ArrayList<PluginInterface>();
+      for ( PluginInterface baseStep : baseSteps ) {
+        if ( baseStep.getCategory().equalsIgnoreCase( baseCategory ) ) {
+          sortedCat.add( baseStep );
+        }
+      }
+      Collections.sort( sortedCat, new Comparator<PluginInterface>() {
+        public int compare( PluginInterface p1, PluginInterface p2 ) {
+          return p1.getName().compareTo( p2.getName() );
+        }
+      } );
+      for ( PluginInterface p : sortedCat ) {
+        final Image stepImage =
+          GUIResource.getInstance().getImagesStepsSmall().get( p.getIds()[ 0 ] );
+        String pluginName = p.getName();
+        String pluginDescription = p.getDescription();
+        if ( !filterMatch( pluginName, filter ) && !filterMatch( pluginDescription, filter ) ) {
+          continue;
+        }
+        createTreeItem( item, pluginName, stepImage );
+        coreStepToolTipMap.put( pluginName, pluginDescription );
+      }
+    }
+
+    // Add History Items...
+    TreeItem item = new TreeItem( stepsTree, SWT.NONE );
+    item.setText( BaseMessages.getString( PKG, "Spoon.History" ) );
+    item.setImage( GUIResource.getInstance().getImageFolder() );
+
+    List<ObjectUsageCount> pluginHistory = props.getPluginHistory();
+
+    // The top 10 at most, the rest is not interesting anyway
+    //
+    for ( int i = 0; i < pluginHistory.size() && i < 10; i++ ) {
+      ObjectUsageCount usage = pluginHistory.get( i );
+      PluginInterface stepPlugin =
+        PluginRegistry.getInstance().findPluginWithId( StepPluginType.class, usage.getObjectName() );
+      if ( stepPlugin != null ) {
+        final Image stepImage =
+            GUIResource.getInstance().getImagesSteps().get( stepPlugin.getIds()[0] ).getAsBitmapForSize( display, ConstUI.MEDIUM_ICON_SIZE, ConstUI.MEDIUM_ICON_SIZE );
+        String pluginName = Const.NVL( stepPlugin.getName(), "" );
+        String pluginDescription = Const.NVL( stepPlugin.getDescription(), "" );
+
+        if ( !filterMatch( pluginName ) && !filterMatch( pluginDescription ) ) {
+          continue;
+        }
+
+        TreeItem stepItem = createTreeItem( item, pluginName, stepImage );
+        stepItem.addListener( SWT.Selection, new Listener() {
+
+          public void handleEvent( Event event ) {
+            System.out.println( "Tree item Listener fired" );
+          }
+        } );
+
+        coreStepToolTipMap.put( stepPlugin.getDescription(), pluginDescription + " (" + usage.getNrUses() + ")" );
+      }
+    }
+  }
+
+  // TODO: shared, move out?
+
+  public void shareObject( SharedObjectInterface sharedObject ) {
     sharedObject.setShared( true );
     EngineMetaInterface meta = getActiveMeta();
     try {
@@ -2506,7 +2558,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     refreshTree();
   }
 
-  protected void unShareObject( SharedObjectInterface sharedObject ) {
+  public void unShareObject( SharedObjectInterface sharedObject ) {
     MessageBox mb = new MessageBox( shell, SWT.YES | SWT.NO | SWT.ICON_WARNING );
     // "Are you sure you want to stop sharing?"
     mb.setMessage( BaseMessages.getString( PKG, "Spoon.Dialog.StopSharing.Message" ) );
@@ -2542,11 +2594,27 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
    * @return The object that is selected in the tree or null if we couldn't figure it out. (titles etc. == null)
    */
   public TreeSelection[] getTreeObjects( final Tree tree ) {
+    //  if ( tree != selectionTree && tree != coreObjectsTree ) {
+    //    
+    //  }
+    // TODO: extension points need this old guesswork...
+
+    if ( testViewPanel != null && tree.equals( testViewPanel.getTree() ) ) {
+      return testViewPanel.getTreeObjects();
+    }
     return delegates.tree.getTreeObjects( tree, selectionTree, coreObjectsTree );
   }
 
-  private void addDragSourceToTree( final Tree tree ) {
-    delegates.tree.addDragSourceToTree( tree, selectionTree, coreObjectsTree );
+//  private void addDragSourceToTree( final Tree tree ) {
+//    delegates.tree.addDragSourceToTree( tree, selectionTree, coreObjectsTree );
+//  }
+//TODO temp
+  private void addDragSourceToCoreObjectsTree( final Tree tree ) {
+    delegates.tree.addDragSourceToTree( tree, null, tree );
+  }
+
+  private void addDragSourceToSelectionTree( final Tree tree ) {
+    delegates.tree.addDragSourceToTree( tree, tree, null );
   }
 
   public void hideToolTips() {
@@ -2654,7 +2722,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     newSlaveServer( (HasSlaveServersInterface) selectionObjectParent );
   }
 
-  public void editTransformationPropertiesPopup() {
+  public void editTransformationPropertiesPopup() { //xul-only
     TransGraph.editProperties( (TransMeta) selectionObject, this, rep, true );
   }
 
@@ -2702,17 +2770,20 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     newStep( getActiveTransformation() );
   }
 
-  public void editConnection() {
+  public void editConnection() {//xul-only
+    final DatabaseMeta databaseMeta = (DatabaseMeta) selectionObject;
+    editConnection( databaseMeta );
+  }
 
+  public void editConnection( DatabaseMeta databaseMeta ) {
     if ( RepositorySecurityUI.verifyOperations( shell, rep, RepositoryOperation.MODIFY_DATABASE ) ) {
       return;
     }
 
-    final DatabaseMeta databaseMeta = (DatabaseMeta) selectionObject;
     delegates.db.editConnection( databaseMeta );
   }
 
-  public void dupeConnection() {
+  public void dupeConnection() {//xul-only
     final DatabaseMeta databaseMeta = (DatabaseMeta) selectionObject;
     final HasDatabasesInterface hasDatabasesInterface = (HasDatabasesInterface) selectionObjectParent;
     delegates.db.dupeConnection( hasDatabasesInterface, databaseMeta );
@@ -2723,12 +2794,21 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     delegates.db.clipConnection( databaseMeta );
   }
 
-  public void delConnection() {
+  public void delConnection() {//xul-only
+    final DatabaseMeta databaseMeta = (DatabaseMeta) selectionObject;
+    delConnection( (HasDatabasesInterface) selectionObjectParent, databaseMeta );
+  }
+
+  @Deprecated
+  public void delConnection( final DatabaseMeta databaseMeta ) {
+    delConnection(  (HasDatabasesInterface) selectionObjectParent, databaseMeta );
+  }
+
+  //TODO: would replace above or move out
+  public void delConnection( final HasDatabasesInterface hasDatabasesInterface, final DatabaseMeta databaseMeta ) {
     if ( RepositorySecurityUI.verifyOperations( shell, rep, RepositoryOperation.DELETE_DATABASE ) ) {
       return;
     }
-
-    final DatabaseMeta databaseMeta = (DatabaseMeta) selectionObject;
     MessageBox mb = new MessageBox( shell, SWT.YES | SWT.NO | SWT.ICON_QUESTION );
     mb.setMessage( BaseMessages.getString(
       PKG, "Spoon.ExploreDB.DeleteConnectionAsk.Message", databaseMeta.getName() ) );
@@ -2739,7 +2819,6 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
       return;
     }
 
-    final HasDatabasesInterface hasDatabasesInterface = (HasDatabasesInterface) selectionObjectParent;
     delegates.db.delConnection( hasDatabasesInterface, databaseMeta );
   }
 
@@ -2822,33 +2901,34 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     delegates.db.exploreDB( databaseMeta, true );
   }
 
-  public void editStep() {
+  public void editStep() {//xul-only
     final TransMeta transMeta = (TransMeta) selectionObjectParent;
     final StepMeta stepMeta = (StepMeta) selectionObject;
-    delegates.steps.editStep( transMeta, stepMeta );
-    sharedObjectSyncUtil.synchronizeSteps( stepMeta );
+    editStep( transMeta, stepMeta );
+//    delegates.steps.editStep( transMeta, stepMeta );
+//    sharedObjectSyncUtil.synchronizeSteps( stepMeta );
   }
 
-  public void dupeStep() {
+  public void dupeStep() {//xul-only
     final TransMeta transMeta = (TransMeta) selectionObjectParent;
     final StepMeta stepMeta = (StepMeta) selectionObject;
     delegates.steps.dupeStep( transMeta, stepMeta );
   }
 
-  public void delStep() {
+  public void delStep() {//xul-only
     final TransMeta transMeta = (TransMeta) selectionObjectParent;
     final StepMeta stepMeta = (StepMeta) selectionObject;
     delegates.steps.delStep( transMeta, stepMeta );
   }
 
-  public void helpStep() {
+  public void helpStep() {//xul-only
     final StepMeta stepMeta = (StepMeta) selectionObject;
     PluginInterface stepPlugin =
       PluginRegistry.getInstance().findPluginWithId( StepPluginType.class, stepMeta.getStepID() );
     HelpUtils.openHelpDialog( shell, stepPlugin );
   }
 
-  public void shareObject( String id ) {
+  public void shareObject( String id ) {//xul-only
     if ( "database-inst-share".equals( id ) ) {
       final DatabaseMeta databaseMeta = (DatabaseMeta) selectionObject;
       if ( databaseMeta.isShared() ) {
@@ -2876,25 +2956,25 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     sharedObjectSyncUtil.reloadSharedObjects();
   }
 
-  public void editJobEntry() {
+  public void editJobEntry() {//xul-only
     final JobMeta jobMeta = (JobMeta) selectionObjectParent;
     final JobEntryCopy jobEntry = (JobEntryCopy) selectionObject;
     editJobEntry( jobMeta, jobEntry );
   }
 
-  public void dupeJobEntry() {
+  public void dupeJobEntry() {//xul-only
     final JobMeta jobMeta = (JobMeta) selectionObjectParent;
     final JobEntryCopy jobEntry = (JobEntryCopy) selectionObject;
     delegates.jobs.dupeJobEntry( jobMeta, jobEntry );
   }
 
-  public void deleteJobEntryCopies() {
+  public void deleteJobEntryCopies() {//xul-only
     final JobMeta jobMeta = (JobMeta) selectionObjectParent;
     final JobEntryCopy jobEntry = (JobEntryCopy) selectionObject;
     deleteJobEntryCopies( jobMeta, jobEntry );
   }
 
-  public void helpJobEntry() {
+  public void helpJobEntry() {//xul-only
     final JobEntryCopy jobEntry = (JobEntryCopy) selectionObject;
     String jobName = jobEntry.getName();
     PluginInterface jobEntryPlugin =
@@ -2902,25 +2982,25 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     HelpUtils.openHelpDialog( shell, jobEntryPlugin );
   }
 
-  public void editHop() {
+  public void editHop() {//xul-only
     final TransMeta transMeta = (TransMeta) selectionObjectParent;
     final TransHopMeta transHopMeta = (TransHopMeta) selectionObject;
     editHop( transMeta, transHopMeta );
   }
 
-  public void delHop() {
+  public void delHop() {//xul-only
     final TransMeta transMeta = (TransMeta) selectionObjectParent;
     final TransHopMeta transHopMeta = (TransHopMeta) selectionObject;
     delHop( transMeta, transHopMeta );
   }
 
-  public void editPartitionSchema() {
+  public void editPartitionSchema() {//xul-only
     final TransMeta transMeta = (TransMeta) selectionObjectParent;
     final PartitionSchema partitionSchema = (PartitionSchema) selectionObject;
     editPartitionSchema( transMeta, partitionSchema );
   }
 
-  public void delPartitionSchema() {
+  public void delPartitionSchema() {//xul-only
     final TransMeta transMeta = (TransMeta) selectionObjectParent;
     final PartitionSchema partitionSchema = (PartitionSchema) selectionObject;
     delPartitionSchema( transMeta, partitionSchema );
@@ -2932,13 +3012,13 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     delegates.clusters.editClusterSchema( transMeta, clusterSchema );
   }
 
-  public void delClusterSchema() {
+  public void delClusterSchema() {//xul-only
     final TransMeta transMeta = (TransMeta) selectionObjectParent;
     final ClusterSchema clusterSchema = (ClusterSchema) selectionObject;
     delegates.clusters.delClusterSchema( transMeta, clusterSchema );
   }
 
-  public void monitorClusterSchema() throws KettleException {
+  public void monitorClusterSchema() throws KettleException {//xul-only
     final ClusterSchema clusterSchema = (ClusterSchema) selectionObject;
     monitorClusterSchema( clusterSchema );
   }
@@ -2948,7 +3028,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     editSlaveServer( slaveServer );
   }
 
-  public void delSlaveServer() {
+  public void delSlaveServer() {//xul-only
     final HasSlaveServersInterface hasSlaveServersInterface = (HasSlaveServersInterface) selectionObjectParent;
     final SlaveServer slaveServer = (SlaveServer) selectionObject;
     delSlaveServer( hasSlaveServersInterface, slaveServer );
@@ -2959,6 +3039,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     addSpoonSlave( slaveServer );
   }
 
+  // menu for view tree
   private synchronized void setMenu( Tree tree ) {
     TreeSelection[] objects = getTreeObjects( tree );
     if ( objects.length != 1 ) {
@@ -3006,30 +3087,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
         spoonMenu = (XulMenupopup) menuMap.get( "step-plugin" );
       } else if ( selection instanceof DatabaseMeta ) {
         spoonMenu = (XulMenupopup) menuMap.get( "database-inst" );
-        // disable for now if the connection is an SAP ERP type of database...
-        //
-        XulMenuitem item =
-          (XulMenuitem) mainSpoonContainer.getDocumentRoot().getElementById( "database-inst-explore" );
-        if ( item != null ) {
-          final DatabaseMeta databaseMeta = (DatabaseMeta) selection;
-          item.setDisabled( !databaseMeta.isExplorable() );
-        }
-        item = (XulMenuitem) mainSpoonContainer.getDocumentRoot().getElementById( "database-inst-clear-cache" );
-        if ( item != null ) {
-          final DatabaseMeta databaseMeta = (DatabaseMeta) selectionObject;
-          item.setLabel( BaseMessages.getString( PKG, "Spoon.Menu.Popup.CONNECTIONS.ClearDBCache" )
-            + databaseMeta.getName() ); // Clear
-        }
-
-        item = (XulMenuitem) mainSpoonContainer.getDocumentRoot().getElementById( "database-inst-share" );
-        if ( item != null ) {
-          final DatabaseMeta databaseMeta = (DatabaseMeta) selection;
-          if ( databaseMeta.isShared() ) {
-            item.setLabel( BaseMessages.getString( PKG, "Spoon.Menu.Popup.CONNECTIONS.UnShare" ) );
-          } else {
-            item.setLabel( BaseMessages.getString( PKG, "Spoon.Menu.Popup.CONNECTIONS.Share" ) );
-          }
-        }
+        doSapErpMenuChanges( (DatabaseMeta) selection );
       } else if ( selection instanceof StepMeta ) {
         spoonMenu = (XulMenupopup) menuMap.get( "step-inst" );
       } else if ( selection instanceof JobEntryCopy ) {
@@ -3052,6 +3110,33 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     }
 
     createPopUpMenuExtension();
+  }
+
+  private void doSapErpMenuChanges( DatabaseMeta dbMeta ) {
+    // disable for now if the connection is an SAP ERP type of database...
+    //
+    XulMenuitem item =
+      (XulMenuitem) mainSpoonContainer.getDocumentRoot().getElementById( "database-inst-explore" );
+    if ( item != null ) {
+      final DatabaseMeta databaseMeta = dbMeta;
+      item.setDisabled( !databaseMeta.isExplorable() );
+    }
+    item = (XulMenuitem) mainSpoonContainer.getDocumentRoot().getElementById( "database-inst-clear-cache" );
+    if ( item != null ) {
+      final DatabaseMeta databaseMeta = (DatabaseMeta) selectionObject;
+      item.setLabel( BaseMessages.getString( PKG, "Spoon.Menu.Popup.CONNECTIONS.ClearDBCache" )
+        + databaseMeta.getName() ); // Clear
+    }
+
+    item = (XulMenuitem) mainSpoonContainer.getDocumentRoot().getElementById( "database-inst-share" );
+    if ( item != null ) {
+      final DatabaseMeta databaseMeta = (DatabaseMeta) dbMeta;
+      if ( databaseMeta.isShared() ) {
+        item.setLabel( BaseMessages.getString( PKG, "Spoon.Menu.Popup.CONNECTIONS.UnShare" ) );
+      } else {
+        item.setLabel( BaseMessages.getString( PKG, "Spoon.Menu.Popup.CONNECTIONS.Share" ) );
+      }
+    }
   }
 
   /**
@@ -3123,8 +3208,11 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
         }
       }
       if ( selection instanceof DatabaseMeta ) {
+        // TODO: no verify? (see #editConnection() )
         DatabaseMeta database = (DatabaseMeta) selection;
-        delegates.db.editConnection( database );
+        editConnection( database );
+        //        delegates.db.editConnection( database );
+        //        sharedObjectSyncUtil.synchronizeConnections( database );
       }
       if ( selection instanceof StepMeta ) {
         StepMeta step = (StepMeta) selection;
@@ -3236,8 +3324,8 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
       }
     } );
 
-    int[] weights = props.getSashWeights();
-    sashform.setWeights( weights );
+    //int[] weights = props.getSashWeights();
+    //TODO:testing sashform.setWeights( weights );
     sashform.setVisible( true );
 
     // Set a minimum width on the sash so that the view and design buttons
@@ -3845,7 +3933,6 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
         SharedObjects sharedObjects =
           repository != null ? repository.readJobMetaSharedObjects( jobMeta ) : jobMeta.readSharedObjects();
         sharedObjectsFileMap.put( sharedObjects.getFilename(), sharedObjects );
-
       } catch ( KettleException e ) {
         new ErrorDialog(
           shell, BaseMessages.getString( PKG, "Spoon.Dialog.ErrorReadingSharedObjects.Title" ), BaseMessages
@@ -6091,11 +6178,15 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
    * @return true in case string matches filter
    */
   @VisibleForTesting boolean filterMatch( String string ) {
+    String filter = selectionFilter.getText();
+    return filterMatch( string, filter );
+  }
+
+  private boolean filterMatch( String string, String filter ) {
     if ( Utils.isEmpty( string ) ) {
       return true;
     }
 
-    String filter = selectionFilter.getText();
     if ( Utils.isEmpty( filter ) ) {
       return true;
     }
@@ -6105,20 +6196,26 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
         return true;
       }
     } catch ( Exception e ) {
+      //TODO
       log.logError( "Not a valid pattern [" + filter + "] : " + e.getMessage() );
     }
 
     return string.toUpperCase().contains( filter.toUpperCase() );
   }
 
-  private void createSelectionTree() {
+  private Tree createSelectionTree( Composite parent ) {
     // //////////////////////////////////////////////////////////////////////////////////////////////////
     //
     // Now set up the transformation/job tree
     //
-    selectionTree = new Tree( variableComposite, SWT.SINGLE );
+    final Tree selectionTree = new Tree( parent, SWT.SINGLE );
     props.setLook( selectionTree );
     selectionTree.setLayout( new FillLayout() );
+    setUpSelectionTree( selectionTree );
+    return selectionTree;
+  }
+
+  private void setUpSelectionTree( final Tree selectionTree ) {
     addDefaultKeyListeners( selectionTree );
 
       /*
@@ -6150,7 +6247,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     } );
 
     // Set a listener on the tree
-    addDragSourceToTree( selectionTree );
+    addDragSourceToSelectionTree( selectionTree );
   }
 
   /**
@@ -6162,13 +6259,13 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     }
 
     if ( selectionTree == null || selectionTree.isDisposed() ) {
-      createSelectionTree();
+      selectionTree = createSelectionTree( variableComposite );
     }
 
-    GUIResource guiResource = GUIResource.getInstance();
     TransMeta activeTransMeta = getActiveTransformation();
     JobMeta activeJobMeta = getActiveJob();
-    boolean showAll = activeTransMeta == null && activeJobMeta == null;
+    boolean showAll = ( activeTransMeta == null && activeJobMeta == null )
+        || !props.isOnlyActiveFileShownInTree();
 
     // get a list of transformations from the transformation map
     //
@@ -6181,6 +6278,13 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
      * JobMeta[] jobMetas = jobs.toArray(new JobMeta[jobs.size()]);
      */
 
+    refreshSelectionTree( selectionTree, activeTransMeta, activeJobMeta, showAll );
+    variableComposite.layout( true, true );
+    setShellText();
+  }
+
+  private void refreshSelectionTree( Tree selectionTree, TransMeta activeTransMeta, JobMeta activeJobMeta,
+      boolean showAll ) {
     // Refresh the content of the tree for those transformations
     //
     // First remove the old ones.
@@ -6188,106 +6292,16 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
 
     // Now add the data back
     //
-    if ( !props.isOnlyActiveFileShownInTree() || showAll || activeTransMeta != null ) {
-      TreeItem tiTrans = new TreeItem( selectionTree, SWT.NONE );
-      tiTrans.setText( STRING_TRANSFORMATIONS );
-      tiTrans.setImage( GUIResource.getInstance().getImageFolder() );
-
-      // Set expanded if this is the only transformation shown.
-      if ( props.isOnlyActiveFileShownInTree() ) {
-        TreeMemory.getInstance().storeExpanded( STRING_SPOON_MAIN_TREE, tiTrans, true );
-      }
-
-      for ( TabMapEntry entry : delegates.tabs.getTabs() ) {
-        Object managedObject = entry.getObject().getManagedObject();
-        if ( managedObject instanceof TransMeta ) {
-          TransMeta transMeta = (TransMeta) managedObject;
-
-          if ( !props.isOnlyActiveFileShownInTree()
-            || showAll || ( activeTransMeta != null && activeTransMeta.equals( transMeta ) ) ) {
-
-            // Add a tree item with the name of transformation
-            //
-            String name = delegates.tabs.makeTabName( transMeta, entry.isShowingLocation() );
-            if ( Utils.isEmpty( name ) ) {
-              name = STRING_TRANS_NO_NAME;
-            }
-
-            TreeItem tiTransName = createTreeItem( tiTrans, name, guiResource.getImageTransTree() );
-
-            // Set expanded if this is the only transformation
-            // shown.
-            if ( props.isOnlyActiveFileShownInTree() ) {
-              TreeMemory.getInstance().storeExpanded( STRING_SPOON_MAIN_TREE, tiTransName, true );
-            }
-
-            refreshDbConnectionsSubtree( tiTransName, transMeta, guiResource );
-
-            refreshStepsSubtree( tiTransName, transMeta, guiResource );
-
-            refreshHopsSubtree( tiTransName, transMeta, guiResource );
-
-            refreshPartitionsSubtree( tiTransName, transMeta, guiResource );
-
-            refreshSlavesSubtree( tiTransName, transMeta, guiResource );
-
-            refreshClustersSubtree( tiTransName, transMeta, guiResource );
-
-            refreshSelectionTreeExtension( tiTransName, transMeta, guiResource );
-
-          }
-        }
+    if ( showAll || activeTransMeta != null ) {
+      refreshSelectionTree( selectionTree, activeTransMeta, showAll );
+      // TODO TEMP
+      if ( testViewPanel != null ) {
+        testViewPanel.refreshSelectionTree( activeTransMeta, showAll );
       }
     }
 
-    if ( !props.isOnlyActiveFileShownInTree() || showAll || activeJobMeta != null ) {
-      TreeItem tiJobs = new TreeItem( selectionTree, SWT.NONE );
-      tiJobs.setText( STRING_JOBS );
-      tiJobs.setImage( GUIResource.getInstance().getImageFolder() );
-
-      // Set expanded if this is the only job shown.
-      if ( props.isOnlyActiveFileShownInTree() ) {
-        tiJobs.setExpanded( true );
-        TreeMemory.getInstance().storeExpanded( STRING_SPOON_MAIN_TREE, tiJobs, true );
-      }
-
-      // Now add the jobs
-      //
-      for ( TabMapEntry entry : delegates.tabs.getTabs() ) {
-        Object managedObject = entry.getObject().getManagedObject();
-        if ( managedObject instanceof JobMeta ) {
-          JobMeta jobMeta = (JobMeta) managedObject;
-
-          if ( !props.isOnlyActiveFileShownInTree()
-            || showAll || ( activeJobMeta != null && activeJobMeta.equals( jobMeta ) ) ) {
-            // Add a tree item with the name of job
-            //
-            String name = delegates.tabs.makeTabName( jobMeta, entry.isShowingLocation() );
-            if ( Utils.isEmpty( name ) ) {
-              name = STRING_JOB_NO_NAME;
-            }
-            if ( !filterMatch( name ) ) {
-              continue;
-            }
-
-            TreeItem tiJobName = createTreeItem( tiJobs, name, guiResource.getImageJobTree() );
-
-            // Set expanded if this is the only job shown.
-            if ( props.isOnlyActiveFileShownInTree() ) {
-              TreeMemory.getInstance().storeExpanded( STRING_SPOON_MAIN_TREE, tiJobName, true );
-            }
-
-            refreshDbConnectionsSubtree( tiJobName, jobMeta, guiResource );
-
-            refreshJobEntriesSubtree( tiJobName, jobMeta, guiResource );
-
-            refreshSelectionTreeExtension( tiJobName, jobMeta, guiResource );
-
-            refreshSlavesSubtree( tiJobName, jobMeta, guiResource );
-
-          }
-        }
-      }
+    if ( showAll || activeJobMeta != null ) {
+      refreshSelectionTree( selectionTree, activeJobMeta, showAll );
     }
 
     // Set the expanded state of the complete tree.
@@ -6297,8 +6311,108 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
 
     selectionTree.setFocus();
     selectionTree.layout();
-    variableComposite.layout( true, true );
-    setShellText();
+  }
+
+  private void refreshSelectionTree( Tree selectionTree, JobMeta activeJobMeta, boolean showAll ) {
+    GUIResource guiResource = GUIResource.getInstance();
+    TreeItem tiJobs = new TreeItem( selectionTree, SWT.NONE );
+    tiJobs.setText( STRING_JOBS );
+    tiJobs.setImage( GUIResource.getInstance().getImageFolder() );
+
+    // Set expanded if this is the only job shown.
+    if ( !showAll ) {
+      tiJobs.setExpanded( true );
+      TreeMemory.getInstance().storeExpanded( STRING_SPOON_MAIN_TREE, tiJobs, true );
+    }
+
+    // Now add the jobs
+    //
+    for ( TabMapEntry entry : delegates.tabs.getTabs() ) {
+      Object managedObject = entry.getObject().getManagedObject();
+      if ( managedObject instanceof JobMeta ) {
+        JobMeta jobMeta = (JobMeta) managedObject;
+
+        if ( showAll || ( activeJobMeta != null && activeJobMeta.equals( jobMeta ) ) ) {
+          // Add a tree item with the name of job
+          //
+          String name = delegates.tabs.makeTabName( jobMeta, entry.isShowingLocation() );
+          if ( Utils.isEmpty( name ) ) {
+            name = STRING_JOB_NO_NAME;
+          }
+          if ( !filterMatch( name ) ) {
+            continue;
+          }
+
+          TreeItem tiJobName = createTreeItem( tiJobs, name, guiResource.getImageJobTree() );
+
+          // Set expanded if this is the only job shown.
+          if ( props.isOnlyActiveFileShownInTree() ) {
+            TreeMemory.getInstance().storeExpanded( STRING_SPOON_MAIN_TREE, tiJobName, true );
+          }
+
+          refreshDbConnectionsSubtree( tiJobName, jobMeta, guiResource );
+
+          refreshJobEntriesSubtree( tiJobName, jobMeta, guiResource );
+
+          refreshSelectionTreeExtension( tiJobName, jobMeta, guiResource );
+
+          refreshSlavesSubtree( tiJobName, jobMeta, guiResource );
+
+        }
+      }
+    }
+  }
+
+  private void refreshSelectionTree( Tree selectionTree, TransMeta activeTransMeta, boolean showAll ) {
+    GUIResource guiResource = GUIResource.getInstance();
+    TreeItem tiTrans = new TreeItem( selectionTree, SWT.NONE );
+    tiTrans.setText( STRING_TRANSFORMATIONS );
+    tiTrans.setImage( GUIResource.getInstance().getImageFolder() );
+
+    // Set expanded if this is the only transformation shown.
+    if ( !showAll ) {
+      TreeMemory.getInstance().storeExpanded( STRING_SPOON_MAIN_TREE, tiTrans, true );
+    }
+
+    for ( TabMapEntry entry : delegates.tabs.getTabs() ) {
+      Object managedObject = entry.getObject().getManagedObject();
+      if ( managedObject instanceof TransMeta ) {
+        TransMeta transMeta = (TransMeta) managedObject;
+
+        if ( showAll || ( activeTransMeta != null && activeTransMeta.equals( transMeta ) ) ) {
+
+          // Add a tree item with the name of transformation
+          //
+          String name = delegates.tabs.makeTabName( transMeta, entry.isShowingLocation() );
+          if ( Utils.isEmpty( name ) ) {
+            name = STRING_TRANS_NO_NAME;
+          }
+
+          TreeItem tiTransName = createTreeItem( tiTrans, name, guiResource.getImageTransTree() );
+
+          // Set expanded if this is the only transformation
+          // shown.
+          if ( props.isOnlyActiveFileShownInTree() ) {
+            TreeMemory.getInstance().storeExpanded( STRING_SPOON_MAIN_TREE, tiTransName, true );
+          }
+
+          refreshDbConnectionsSubtree( tiTransName, transMeta, guiResource );
+
+          refreshStepsSubtree( tiTransName, transMeta, guiResource );
+
+          refreshHopsSubtree( tiTransName, transMeta, guiResource );
+
+          refreshPartitionsSubtree( tiTransName, transMeta, guiResource );
+
+          refreshSlavesSubtree( tiTransName, transMeta, guiResource );
+
+          refreshClustersSubtree( tiTransName, transMeta, guiResource );
+
+          refreshSelectionTreeExtension( tiTransName, transMeta, guiResource );
+
+        }
+      }
+    }
   }
 
   @VisibleForTesting TreeItem createTreeItem( TreeItem parent, String text, Image image ) {
@@ -6373,6 +6487,8 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
       PluginInterface stepPlugin =
         PluginRegistry.getInstance().findPluginWithId( StepPluginType.class, stepMeta.getStepID() );
 
+      // TODO: in job entries and design steps also filters by description
+      // TODO: also, 
       if ( !filterMatch( stepMeta.getName() ) ) {
         continue;
       }
@@ -6390,6 +6506,37 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
       if ( !stepMeta.isDrawn() ) {
         tiStep.setForeground( guiResource.getColorDarkGray() );
       }
+    }
+  }
+
+  private void refreshJobEntriesSubtree( TreeItem tiJobName, JobMeta jobMeta, GUIResource guiResource ) {
+    TreeItem tiJobEntriesTitle = createTreeItem( tiJobName, STRING_JOB_ENTRIES, guiResource.getImageFolder() );
+
+    for ( int i = 0; i < jobMeta.nrJobEntries(); i++ ) {
+      JobEntryCopy jobEntry = jobMeta.getJobEntry( i );
+
+      if ( !filterMatch( jobEntry.getName() ) && !filterMatch( jobEntry.getDescription() ) ) {
+        continue;
+      }
+
+      TreeItem tiJobEntry = ConstUI.findTreeItem( tiJobEntriesTitle, jobEntry.getName() );
+      if ( tiJobEntry != null ) {
+        continue; // only show it once
+      }
+
+      // if (jobEntry.isShared())
+      // tiStep.setFont(guiResource.getFontBold()); TODO:
+      // allow job entries to be shared as well...
+      Image icon;
+      if ( jobEntry.isStart() ) {
+        icon = GUIResource.getInstance().getImageStartMedium();
+      } else if ( jobEntry.isDummy() ) {
+        icon = GUIResource.getInstance().getImageDummyMedium();
+      } else {
+        String key = jobEntry.getEntry().getPluginId();
+        icon = GUIResource.getInstance().getImagesJobentriesSmall().get( key );
+      }
+      createTreeItem( tiJobEntriesTitle, jobEntry.getName(), icon );
     }
   }
 
@@ -6486,6 +6633,9 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
 
 
   @VisibleForTesting void createPopUpMenuExtension() {
+    createPopUpMenuExtension( selectionTree );
+  }
+  private void createPopUpMenuExtension( Tree selectionTree ) {
     try {
       ExtensionPointHandler.callExtensionPoint( log, KettleExtensionPoint.SpoonPopupMenuExtension.id, selectionTree );
     } catch ( Exception e ) {
@@ -6532,36 +6682,6 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     }
   }
 
-  private void refreshJobEntriesSubtree( TreeItem tiJobName, JobMeta jobMeta, GUIResource guiResource ) {
-    TreeItem tiJobEntriesTitle = createTreeItem( tiJobName, STRING_JOB_ENTRIES, guiResource.getImageFolder() );
-
-    for ( int i = 0; i < jobMeta.nrJobEntries(); i++ ) {
-      JobEntryCopy jobEntry = jobMeta.getJobEntry( i );
-
-      if ( !filterMatch( jobEntry.getName() ) && !filterMatch( jobEntry.getDescription() ) ) {
-        continue;
-      }
-
-      TreeItem tiJobEntry = ConstUI.findTreeItem( tiJobEntriesTitle, jobEntry.getName() );
-      if ( tiJobEntry != null ) {
-        continue; // only show it once
-      }
-
-      // if (jobEntry.isShared())
-      // tiStep.setFont(guiResource.getFontBold()); TODO:
-      // allow job entries to be shared as well...
-      Image icon;
-      if ( jobEntry.isStart() ) {
-        icon = GUIResource.getInstance().getImageStartMedium();
-      } else if ( jobEntry.isDummy() ) {
-        icon = GUIResource.getInstance().getImageDummyMedium();
-      } else {
-        String key = jobEntry.getEntry().getPluginId();
-        icon = GUIResource.getInstance().getImagesJobentriesSmall().get( key );
-      }
-      createTreeItem( tiJobEntriesTitle, jobEntry.getName(), icon );
-    }
-  }
 
   public String getActiveTabText() {
     if ( tabfolder.getSelected() == null ) {
@@ -6838,6 +6958,9 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     markTabsChanged( false );
   }
 
+  /**
+   * Enables just about everything that needs enablement //TODO proper doc
+   */
   public void enableMenus() {
     boolean disableTransMenu = getActiveTransformation() == null;
     boolean disableJobMenu = getActiveJob() == null;
@@ -6954,6 +7077,9 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
         refreshCoreObjects();
 
         fireMenuControlers();
+
+        //TODO TESTING
+        onTheEnablementOfTestTreeStuff( !disableTransMenu, !disableJobMenu );
       }
     }
   }
@@ -9080,7 +9206,7 @@ public class Spoon extends ApplicationWindow implements AddUndoPositionInterface
     return rep.getSecurityManager();
   }
 
-  public void displayDbDependancies() {
+  public void displayDbDependancies() {//xul-only
     TreeItem[] selection = selectionTree.getSelection();
     if ( selection == null || selection.length != 1 ) {
       return;

@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<window id="view-tree-menu" title="Here be Menus" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:pen="http://www.pentaho.org/2008/xul">
+
+  <menupopup id="trans-inst">
+    <menuitem id="trans-inst-settings" label="${Spoon.Menu.Transformation.Settings}" command="spoon.editTransformationPropertiesPopup()" />
+    <menuitem id="trans-inst-logging" label="${Spoon.Menu.Popup.BASE.LogWindow}" command="spoon.addTransLog()" />
+    <menuitem id="trans-inst-history" label="${Spoon.Menu.Popup.BASE.HistoryWindow}" command="spoon.addTransHistory()" />
+  </menupopup>
+
+  <menupopup id="job-inst">
+    <menuitem id="job-inst-settings" label="${Spoon.Menu.Job.Settings}" command="spoon.editJobPropertiesPopup()" />
+    <menuitem id="job-inst-logging" label="${Spoon.Menu.Popup.BASE.LogWindow}" command="spoon.addJobLog()" />
+    <menuitem id="job-inst-history" label="${Spoon.Menu.Popup.BASE.HistoryWindow}" command="spoon.addJobHistory()" />
+  </menupopup>
+
+  <menupopup id="step-plugin">
+    <menuitem id="step-plugin-new" label="${Spoon.Menu.Popup.BASE.New}" command="spoon.newStep()" />
+  </menupopup>
+
+  <menupopup id="database-inst">
+    <menuitem id="database-inst-new" label="${Spoon.Menu.Popup.CONNECTIONS.New}" command="spoon.newConnection()" />
+    <menuitem id="database-inst-edit" label="${Spoon.Menu.Popup.CONNECTIONS.Edit}" command="spoon.editConnection()" />
+    <menuitem id="database-inst-duplicate" label="${Spoon.Menu.Popup.CONNECTIONS.Duplicate}" command="spoon.dupeConnection()" />
+    <menuitem id="database-inst-copy" label="${Spoon.Menu.Popup.CONNECTIONS.CopyToClipboard}" command="spoon.clipConnection()" />
+    <menuitem id="database-inst-delete" label="${Spoon.Menu.Popup.CONNECTIONS.Delete}" command="spoon.delConnection()" />
+    <menuseparator />
+    <menuitem id="database-inst-sql-edit" label="${Spoon.Menu.Popup.CONNECTIONS.SQLEditor}" command="spoon.sqlConnection()" />
+    <menuitem id="database-inst-clear-cache" label="${Spoon.Menu.Popup.CONNECTIONS.ClearDBCache}" command="spoon.clearDBCache('database-inst-clear-cache')"/>
+    <menuitem id="database-inst-share" label="${Spoon.Menu.Popup.CONNECTIONS.Share}" command="spoon.shareObject('database-inst-share')" />
+    <menuitem id="database-inst-explore" label="${Spoon.Menu.Popup.CONNECTIONS.Explore}" command="spoon.exploreDB()" />
+    <menuseparator />
+    <menuitem id="database-inst-dependancy" label="${Spoon.Menu.Popup.CONNECTIONS.ShowDependancies}" command="spoon.displayDbDependancies()" />
+  </menupopup>
+
+  <menupopup id="step-inst">
+    <menuitem id="step-inst-edit" label="${Spoon.Menu.Popup.STEPS.Edit}" command="handler.editStep()" />
+    <menuitem id="step-inst-duplicate" label="${Spoon.Menu.Popup.STEPS.Duplicate}" command="handler.dupeStep()" />
+    <menuitem id="step-inst-delete" label="${Spoon.Menu.Popup.STEPS.Delete}" command="handler.delStep()" />
+    <menuitem id="step-inst-share" label="${Spoon.Menu.Popup.STEPS.Share}" command="handler.shareObject('step-inst-share')" />
+    <menuseparator id="step-inst-separator-1"/>
+    <menuitem id="step-inst-help" label="${Spoon.Menu.Popup.STEPS.Help}" command="handler.helpStep()" />
+
+  </menupopup>
+
+  <menupopup id="job-entry-copy-inst">
+    <menuitem id="job-entry-copy-edit" label="${Spoon.Menu.Popup.STEPS.Edit}" command="spoon.editJobEntry()" />
+    <menuitem id="job-entry-copy-duplicate" label="${Spoon.Menu.Popup.STEPS.Duplicate}" command="spoon.dupeJobEntry()" />
+    <menuitem id="job-entry-copy-delete" label="${Spoon.Menu.Popup.STEPS.Delete}" command="spoon.deleteJobEntryCopies()" />
+    <menuseparator id="job-entry-copy-inst-separator-1"/>
+    <menuitem id="job-entry-copy-help" label="${Spoon.Menu.Popup.STEPS.Help}" command="spoon.helpJobEntry()" />
+
+  </menupopup>
+
+  <menupopup id="trans-hop-inst">
+    <menuitem id="trans-hop-inst-edit" label="${Spoon.Menu.Popup.STEPS.Edit}" command="spoon.editHop()" />
+    <menuitem id="trans-hop-inst-delete" label="${Spoon.Menu.Popup.STEPS.Delete}" command="spoon.delHop()" />
+  </menupopup>
+
+  <menupopup id="partition-schema-inst">
+    <menuitem id="partition-schema-inst-edit" label="${Spoon.Menu.Popup.STEPS.Edit}" command="spoon.editPartitionSchema()" />
+    <menuitem id="partition-schema-inst-delete" label="${Spoon.Menu.Popup.STEPS.Delete}" command="spoon.delPartitionSchema()" />
+    <menuitem id="partition-schema-inst-share" label="${Spoon.Menu.Popup.STEPS.Share}" command="spoon.shareObject('partition-schema-inst-share')" />
+  </menupopup>
+
+  <menupopup id="cluster-schema-inst">
+    <menuitem id="cluster-schema-inst-edit" label="${Spoon.Menu.Popup.STEPS.Edit}" command="spoon.editClusterSchema()" />
+    <menuitem id="cluster-schema-inst-delete" label="${Spoon.Menu.Popup.STEPS.Delete}" command="spoon.delClusterSchema()" />
+    <menuitem id="cluster-schema-inst-share" label="${Spoon.Menu.Popup.STEPS.Share}" command="spoon.shareObject('cluster-schema-inst-share')" />
+    <menuitem id="cluster-schema-inst-monitor" label="${Spoon.Menu.Popup.CLUSTERS.Monitor}" command="spoon.monitorClusterSchema()" />
+  </menupopup>
+
+  <menupopup id="slave-server-inst">
+    <menuitem id="slave-server-inst-edit" label="${Spoon.Menu.Popup.STEPS.Edit}" command="spoon.editSlaveServer()" />
+    <menuitem id="slave-server-inst-delete" label="${Spoon.Menu.Popup.STEPS.Delete}" command="spoon.delSlaveServer()" />
+    <menuitem id="slave-server-inst-share" label="${Spoon.Menu.Popup.STEPS.Share}" command="spoon.shareObject('slave-server-inst-share')" />
+    <menuitem id="slave-server-inst-monitor" label="${Spoon.Menu.Popup.SLAVE_SERVER.Monitor}" command="spoon.addSpoonSlave()" />
+  </menupopup>
+</window>
