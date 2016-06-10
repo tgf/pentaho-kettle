@@ -46,6 +46,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Props;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -72,6 +73,8 @@ import org.pentaho.ui.xul.XulLoader;
 import org.pentaho.ui.xul.containers.XulToolbar;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.tags.SwtRadio;
+
+import sun.security.action.GetLongAction;
 
 public class TransPreviewDelegate extends SpoonDelegate implements XulEventHandler {
   private static Class<?> PKG = Spoon.class; // for i18n purposes, needed by Translator2!!
@@ -189,6 +192,13 @@ public class TransPreviewDelegate extends SpoonDelegate implements XulEventHandl
         refreshView();
       }
     } );
+    TransPreviewExtension extension = new TransPreviewExtension(
+        transPreviewComposite, toolbarControl, previewComposite );
+    try {
+      ExtensionPointHandler.callExtensionPoint( log, "TransPreviewCreated", extension );
+    } catch ( KettleException ex ) {
+      log.logError( "Extension point call failed.", ex );
+    }
   }
 
   private void addToolBar() {
@@ -210,8 +220,8 @@ public class TransPreviewDelegate extends SpoonDelegate implements XulEventHandl
       offRadio = (SwtRadio) xulDomContainer.getDocumentRoot().getElementById( "preview-off" );
 
       PropsUI.getInstance().setLook( (Control) firstRadio.getManagedObject() );
-      PropsUI.getInstance().setLook( (Control) lastRadio.getManagedObject() );
-      PropsUI.getInstance().setLook( (Control) offRadio.getManagedObject() );
+//      PropsUI.getInstance().setLook( (Control) lastRadio.getManagedObject() );
+//      PropsUI.getInstance().setLook( (Control) offRadio.getManagedObject() );
 
     } catch ( Throwable t ) {
       log.logError( toString(), Const.getStackTracker( t ) );
