@@ -3,7 +3,6 @@ package org.pentaho.di.ui.spoon.panel;
 import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -12,7 +11,6 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.pentaho.di.core.dnd.DragAndDropContainer;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.ui.xul.containers.XulMenupopup;
 
 /**
  * associate to each tree item a treeItemInfo that know what to do and has a ref to the target object?

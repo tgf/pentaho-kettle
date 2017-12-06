@@ -118,7 +118,7 @@ public abstract class SpoonTreePanel {
 
     toolbar = new SpoonTreePanelToolbar( toolbarComposite, SWT.FLAT );
     toolbar.setText( testLabel );
-    objectsTree = new Tree( panelComposite, SWT.FLAT );
+    objectsTree = new Tree( panelComposite, SWT.SINGLE ); //was FLAT for some reason
     FormData fdObjectsTree = new FormData();
     fdObjectsTree.top = new FormAttachment( toolbarSeparator );
     fdObjectsTree.left = new FormAttachment( 0 );
@@ -131,7 +131,7 @@ public abstract class SpoonTreePanel {
     tooltip.setRespectDisplayBounds( true );
     tooltip.setPopupDelay( TOOLTIP_POPUP_DELAY );
     tooltip.setHideDelay( TOOLTIP_HIDE_DELAY );
-    tooltip.setShift( new org.eclipse.swt.graphics.Point( ConstUI.TOOLTIP_OFFSET + 10, ConstUI.TOOLTIP_OFFSET + 10 ) );
+    tooltip.setShift( new org.eclipse.swt.graphics.Point( ConstUI.TOOLTIP_OFFSET, ConstUI.TOOLTIP_OFFSET ) ); // + 10
   }
 
   protected Tree getTree() {
@@ -164,9 +164,13 @@ public abstract class SpoonTreePanel {
             if ( data != null ) {
               data.showTooltip( tooltip, item, e );
             }
+          } else {
+            hideTooltip();
           }
         }
       }
+
+
     } );
   }
 
@@ -174,6 +178,11 @@ public abstract class SpoonTreePanel {
 //    this.treeDelegate = treeDelegate;
 //    treeDelegate.addDragSourceToTree( objectsTree, null, objectsTree );
 //  }
+  private void hideTooltip() {
+    if ( tooltip != null ) {
+      tooltip.hide();
+    }
+  }
 
   public SpoonTreeDelegate getTreeDelegate() {
     // TODO
@@ -281,6 +290,10 @@ public abstract class SpoonTreePanel {
       }
     }
     return null;
+  }
+
+  protected void logDebug( String str ) {
+    System.out.println( "" );
   }
 
   //TODO temp

@@ -133,7 +133,7 @@ public abstract class SpoonTransJobTreePanel extends SpoonTreePanel {
       toolTip.setText( plugin.getName() + Const.CR + Const.CR + plugin.getDescription() );
       toolTip.setBackgroundColor( GUIResource.getInstance().getColor( 255, 254, 225 ) );
       toolTip.setForegroundColor( GUIResource.getInstance().getColor( 0, 0, 0 ) );
-      toolTip.show( new org.eclipse.swt.graphics.Point( move.x, move.y ) );
+      toolTip.show( new org.eclipse.swt.graphics.Point( move.x + 10, move.y + 10 ) );
       return true;
     }
 
