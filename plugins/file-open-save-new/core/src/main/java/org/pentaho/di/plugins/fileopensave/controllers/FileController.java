@@ -53,20 +53,38 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * Created by bmorrise on 2/13/19.
  */
+// This dialog's use of generics is inconsistent and will likely never be fixed,
+// so we might as well not be swamped by warnings
+@SuppressWarnings( { "rawtypes", "unchecked" } )
 public class FileController {
+
+  public interface FileLoadListener {
+    void onFileLoaded( File file, FileProvider<File> provider, FileController controller );
+  }
 
   protected final FileCache fileCache;
   private final ProviderService providerService;
   private VariableSpace space = Variables.getADefaultVariableSpace();
 
+  private final Optional<FileLoadListener> fileListener;
+
   public FileController( FileCache fileCache, ProviderService providerService ) {
     this.fileCache = fileCache;
     this.providerService = providerService;
+    this.fileListener = Optional.empty();
+  }
+
+  public FileController( FileCache fileCache, ProviderService providerService, FileLoadListener fileLoadListener ) {
+    this.fileCache = fileCache;
+    this.providerService = providerService;
+    this.fileListener = Optional.of( fileLoadListener );
   }
 
   public boolean clearCache( File file ) {
@@ -115,17 +133,19 @@ public class FileController {
   public List<File> getFiles( File file, String filters, boolean useCache ) throws FileException {
     try {
       FileProvider<File> fileProvider = providerService.get( file.getProvider() );
+      List<File> files;
       if ( fileCache.containsKey( file ) && useCache ) {
-        return fileCache.getFiles( file ).stream()
+        files = fileCache.getFiles( file ).stream()
           .filter( f -> f instanceof Directory
             || ( f instanceof RepositoryFile && ( (RepositoryFile) f ).passesTypeFilter( filters ) )
             || org.pentaho.di.plugins.fileopensave.api.providers.Utils.matches( f.getName(), filters ) )
           .collect( Collectors.toList() );
       } else {
-        List<File> files = fileProvider.getFiles( file, filters, space );
+        files = fileProvider.getFiles( file, filters, space );
         fileCache.setFiles( file, files );
-        return files;
       }
+      fileListener.ifPresent( listener -> files.forEach( f -> listener.onFileLoaded( f, fileProvider, this ) ) );
+      return files;
     } catch ( InvalidFileProviderException e ) {
       return Collections.emptyList();
     }
@@ -284,6 +304,21 @@ public class FileController {
       // Don't add it to the list
     }
     return null;
+  }
+
+  public boolean hasChild( File file, String filter, boolean useCache ) throws FileException {
+    Predicate<File> fileFilter = f -> org.pentaho.di.plugins.fileopensave.api.providers.Utils.matches( f.getName(), filter );
+    Predicate<File> notDir = f -> !(f instanceof Directory);
+    try {
+      FileProvider<File> fileProvider = providerService.get( file.getProvider() );
+      if ( useCache && fileCache.containsKey(file) ) {
+        return fileCache.getFiles( file ).stream().filter( fileFilter ).anyMatch( notDir );
+      } else {
+        return fileProvider.getFiles( file, filter, space ).stream().anyMatch( notDir );
+      }
+    } catch ( InvalidFileProviderException e ) {
+      return false;
+    }
   }
 
   /**
