@@ -1,0 +1,33 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../../../../../../../.."
+		},
+		{
+			"path": "../../../../../../../../../../../../../../../pentaho-platform/repository"
+		},
+		{
+			"path": "../../../../../../../../../../../../../../../pentaho-platform/extensions"
+		},
+		{
+			"path": "../../../../../../../../../../../../../pur/core"
+		},
+		{
+			"path": "../../../../../../../../../../../../../../engine"
+		},
+		{
+			"path": "../../../../../../../../../../../../../../core"
+		},
+		{
+			"path": "../../../../../../../../../../../../../../ui"
+		},
+		{
+			"path": "../../../../../../../../../../../../../connections/ui"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive",
+		"java.compile.nullAnalysis.mode": "disabled",
+		"java.debug.settings.onBuildFailureProceed": true
+	}
+}
