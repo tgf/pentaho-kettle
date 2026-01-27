@@ -186,6 +186,11 @@ public class SwtSvgImageUtil {
     return getImageAsResource( display, location );
   }
 
+  public static Image createIcon( Display display, String location ) {
+    var universalImg = loadFromCurrentClasspath( display, location );
+    return universalImg.getAsBitmapForSize( display, ConstUI.MEDIUM_ICON_SIZE, ConstUI.MEDIUM_ICON_SIZE );
+  }
+
   /**
    * Internal image loading by ClassLoader.getResourceAsStream.
    */
