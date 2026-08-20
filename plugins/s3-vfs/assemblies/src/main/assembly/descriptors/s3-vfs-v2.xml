@@ -1,0 +1,44 @@
+<!-- ******************************************************************************
+ *
+ * Pentaho
+ *
+ * Copyright (C) 2026 by Pentaho Canada Inc. : http://www.pentaho.com
+ *
+ * Use of this software is governed by the Business Source License included
+ * in the LICENSE.TXT file.
+ *
+ * Change Date: 2030-06-15
+ ******************************************************************************* -->
+<!-- v2 plugin zip descriptor: same layout as s3-vfs.xml, but packages the pentaho-s3-vfs-v2 jar -->
+<assembly>
+    <id>v2</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <baseDirectory>pentaho-s3-vfs-plugin-v2</baseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>pentaho:pentaho-s3-vfs-v2:jar</include>
+            </includes>
+            <useProjectArtifact>false</useProjectArtifact>
+        </dependencySet>
+        <!-- AWS SDK v2. Included by groupId wildcard: the SDK is split into many small modules and
+             the exact set shifts between releases, so enumerating them by name goes stale silently. -->
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>${artifact.artifactId}-${artifact.baseVersion}.${artifact.extension}
+            </outputFileNameMapping>
+            <includes>
+                <include>software.amazon.awssdk:*</include>
+                <include>software.amazon.eventstream:eventstream</include>
+                <include>org.reactivestreams:reactive-streams</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+</assembly>
+<!-- end v2 plugin zip descriptor -->
